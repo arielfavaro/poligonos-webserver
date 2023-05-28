@@ -1,0 +1,46 @@
+version: '3'
+
+services:
+  backend_server:
+    build: ./backend_server
+    restart: unless-stopped
+    ports:
+      - 8080:8080
+
+  web_app:
+    image: nginx
+    ports:
+      - 3000:80
+    volumes:
+      - ./web_app:/usr/share/nginx/html
+    restart: unless-stopped
+
+  db:
+    image: postgis/postgis:15-3.3
+    ports:
+      - 5432:5432
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=1234
+      - POSTGRES_DB=poligonos
+      - POSTGIS_GDAL_ENABLED_DRIVERS=ENABLE_ALL
+    volumes:
+      - postgis_poligonos:/var/lib/postgresql/data
+    restart: unless-stopped
+
+  pgadmin:
+    image: dpage/pgadmin4:7.1
+    environment:
+      - PGADMIN_DEFAULT_EMAIL=dev@dev.com
+      - PGADMIN_DEFAULT_PASSWORD=1234
+    ports:
+      - 8081:80
+
+  # adminer:
+  #   image: adminer
+  #   restart: unless-stopped
+  #   ports:
+  #     - 8082:8080
+
+volumes:
+  postgis_poligonos:
