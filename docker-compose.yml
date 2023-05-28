@@ -8,11 +8,11 @@ services:
       - 8080:8080
 
   web_app:
-    image: nginx
+    build: ./web_app
     ports:
-      - 3000:80
-    volumes:
-      - ./web_app:/usr/share/nginx/html
+      - 80:80
+    # volumes:
+    #   - ./web_app:/usr/share/nginx/html
     restart: unless-stopped
 
   db:

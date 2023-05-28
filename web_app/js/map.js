@@ -1,46 +1,20 @@
-(async function () {
-    function serialize(params) {
-        let data = '';
+import 'leaflet/dist/leaflet.css';
+import '../css/map.css';
+import { serialize } from './lib/serialize';
+import { simplifyFactor } from './lib/simplifyFactor';
+import '../css/vendor/L.Control.Zoominfo.css';
+import './vendor/L.Control.Zoominfo';
+import { Map, TileLayer, geoJSON, LayerGroup } from 'leaflet';
 
-        for (let key in params) {
-            if (Object.prototype.hasOwnProperty.call(params, key)) {
-                let param = params[key];
-                let type = Object.prototype.toString.call(param);
-                let value;
+const API_BASE_PATH = "http://localhost:8080";
 
-                if (data.length) {
-                    data += '&';
-                }
-
-                if (type === '[object Array]') {
-                    value = (Object.prototype.toString.call(param[0]) === '[object Object]') ? JSON.stringify(param) : param.join(',');
-                } else if (type === '[object Object]') {
-                    value = JSON.stringify(param);
-                } else if (type === '[object Date]') {
-                    value = param.valueOf();
-                } else {
-                    value = param;
-                }
-
-                data += encodeURIComponent(key) + '=' + encodeURIComponent(value);
-            }
-        }
-
-        return data;
-    }
-
-    function simplifyFactor(map, factor) {
-        var mapWidth = Math.abs(map.getBounds().getWest() - map.getBounds().getEast());
-        return (mapWidth / map.getSize().y) * factor;
-    }
-
-    const API_BASE_PATH = "http://localhost:8080";
+export const initMap = async () => {
 
     const respose = await fetch(`${API_BASE_PATH}/camadas`);
 
     const camadas = await respose.json();
 
-    const map = L.map('map', {
+    const map = Map('map', {
         zoominfoControl: true,
         zoomControl: false,
         center: [-15.897942, -47.966308],
@@ -48,12 +22,12 @@
     });
 
     // Adicione um provedor de mapa de fundo OpenStreetMap
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    TileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
         attribution: 'Map data &copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a> contributors',
         maxZoom: 18
     }).addTo(map);
 
-    const PoligonosCustom = L.layerGroup();
+    const PoligonosCustom = LayerGroup();
     PoligonosCustom.addTo(map);
 
     const getData = async (camada, cor) => {
@@ -75,7 +49,7 @@
 
         const data = await respose.json();
 
-        PoligonosCustom.addLayer(L.geoJSON(data, {
+        PoligonosCustom.addLayer(geoJSON(data, {
             style: {
                 color: cor,
                 fillColor: cor,
@@ -105,4 +79,4 @@
         console.log('map click', e.latlng);
     });
 
-})();
+}
