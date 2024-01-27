@@ -4,6 +4,15 @@ services:
   backend_server:
     build: ./backend_server
     restart: unless-stopped
+    environment:
+      - DEV_DB_USERNAME=${DB_USERNAME}
+      - DEV_DB_PASSWORD=${DB_PASSWORD}
+      - DEV_DB_NAME=${DB_NAME}
+      - DEV_DB_HOSTNAME=${DB_HOSTNAME}
+      - DEV_DB_PORT=${DB_PORT}
+      - PORT=8080
+    depends_on:
+      - db
     ports:
       - 8080:8080
 
@@ -21,10 +30,10 @@ services:
       - 3306:3306
     command: --default-authentication-plugin=mysql_native_password
     environment:
-      - MYSQL_USER=mapa
-      - MYSQL_PASSWORD=1234
+      - MYSQL_USER=${DB_USERNAME}
+      - MYSQL_PASSWORD=${DB_PASSWORD}
       - MYSQL_ROOT_PASSWORD=12345678
-      - MYSQL_DATABASE=poligonos
+      - MYSQL_DATABASE=${DB_NAME}
     volumes:
       - poligonos:/var/lib/mysql
     restart: unless-stopped
