@@ -52,7 +52,7 @@
     // Adicione um provedor de mapa de fundo OpenStreetMap
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
         attribution: 'Map data &copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a> contributors',
-        maxZoom: 18
+        maxZoom: 22
     }).addTo(map);
 
     const PoligonosCustom = L.layerGroup();
