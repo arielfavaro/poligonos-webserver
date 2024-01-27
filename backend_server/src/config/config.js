@@ -8,7 +8,7 @@ module.exports = {
     database: process.env.DEV_DB_NAME,
     host: process.env.DEV_DB_HOSTNAME,
     port: process.env.DEV_DB_PORT,
-    dialect: 'postgres',
+    dialect: 'mysql',
     dialectOptions: {
       bigNumberStrings: true
     }
@@ -18,8 +18,8 @@ module.exports = {
     password: process.env.CI_DB_PASSWORD,
     database: process.env.CI_DB_NAME,
     host: '127.0.0.1',
-    port: 5432,
-    dialect: 'postgres',
+    port: 3306,
+    dialect: 'mysql',
     dialectOptions: {
       bigNumberStrings: true
     }
@@ -30,7 +30,7 @@ module.exports = {
     database: process.env.PROD_DB_NAME,
     host: process.env.PROD_DB_HOSTNAME,
     port: process.env.PROD_DB_PORT,
-    dialect: 'postgres',
+    dialect: 'mysql',
     // dialectOptions: {
     //   bigNumberStrings: true,
     //   ssl: {

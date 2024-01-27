@@ -33,6 +33,7 @@ app.get('/camadas', async (req, res) => {
             'identificador',
             'cor_borda',
             'cor_preenchimento',
+            'limite',
         ],
         where: {
             ativo: true,
@@ -112,23 +113,36 @@ app.get('/:identificadorCamada/query', queryValidationChain(), async (req, res) 
         xmax = 0,
         ymax = 0 } = JSON.parse(geometry);
 
+    /**
+     * TODO verificar cast de multipolygon para polygon ou ao contrario
+     * Para evitar ter que tratar os dados na tabela entre cada camada
+     */
     const query = `
         SELECT
             id,
-
-            ST_AsGeoJSON(
-                (ST_Dump(
-                    ST_Simplify(ST_Force2D("geom"), ${simplify}, true)
-                )).geom::geometry(Polygon, 4326)
-            )::json->'coordinates' AS coordinates
+            ST_GeometryType(geom) type,
+            JSON_EXTRACT(ST_ASGEOJSON(ST_SIMPLIFY(geom, ${simplify})), '$.coordinates') AS coordinates
 
             FROM ${tabela}
 
-            WHERE geom && ST_MakeEnvelope(${xmin}, ${ymin}, ${xmax}, ${ymax}, 4326)
-            -- AND ST_IsValid(geom)
+            WHERE ST_Intersects(
+                geom,
+                ST_ENVELOPE(ST_GEOMFROMTEXT('LineString(${xmin} ${ymin}, ${xmax} ${ymax})', 4326))
+            )
+
+            ORDER BY id
 
             LIMIT ${limit}
     `;
+
+    const types = {
+        "POINT": "Point",
+        "MULTIPOINT": "MultiPoint",
+        "LINESTRING": "LineString",
+        "MULTILINESTRING": "MultiLineString",
+        "POLYGON" : "Polygon",
+        "MULTIPOLYGON" : "MultiPolygon",
+    };
 
     const [results, metadata] = await db.sequelize.query(query);
 
@@ -144,7 +158,7 @@ app.get('/:identificadorCamada/query', queryValidationChain(), async (req, res) 
             type: "Feature",
             id: result.id,
             geometry: {
-                type: "Polygon",
+                type: types[result.type] ?? '',
                 coordinates: result.coordinates,
             },
             properties: {

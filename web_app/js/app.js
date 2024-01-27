@@ -36,6 +36,8 @@
 
     const API_BASE_PATH = "http://localhost:8080";
 
+    const activeControllers = [];
+
     const respose = await fetch(`${API_BASE_PATH}/camadas`);
 
     const camadas = await respose.json();
@@ -56,7 +58,9 @@
     const PoligonosCustom = L.layerGroup();
     PoligonosCustom.addTo(map);
 
-    const getData = async (camada, cor) => {
+    const getData = async (camada, cor, limite) => {
+        const controller = new AbortController();
+        activeControllers.push(controller);
 
         const bounds = map.getBounds()
 
@@ -68,28 +72,49 @@
                 ymax: bounds._northEast.lat,
             },
             simplify: simplifyFactor(map, 0.5),
-            limit: 2000,
+            limit: limite,
         });
 
-        const respose = await fetch(`${API_BASE_PATH}/${camada}/query?${searchParams}`);
+        try {
+            const respose = await fetch(`${API_BASE_PATH}/${camada}/query?${searchParams}`, { signal: controller.signal });
 
-        const data = await respose.json();
+            const data = await respose.json();
 
-        PoligonosCustom.addLayer(L.geoJSON(data, {
-            style: {
-                color: cor,
-                fillColor: cor,
+            PoligonosCustom.addLayer(L.geoJSON(data, {
+                style: {
+                    color: cor,
+                    fillColor: cor,
+                }
+            }));
+
+        } catch (error) {
+            if (error.name === 'AbortError') {
+                console.log('Get Data cancelado');
             }
-        }));
+        } finally {
+            const index = activeControllers.indexOf(controller);
+            if (index !== -1) {
+                activeControllers.splice(index, 1);
+            }
+        }
+    }
+
+    const cancelAllGetData = () => {
+        for (const controller of activeControllers) {
+            controller.abort();
+        }
+        activeControllers.length = 0;
     }
 
     const updateData = () => {
         // if(map.getZoom() > 13) return
 
+        cancelAllGetData();
+
         PoligonosCustom.clearLayers();
 
         for (const camada of camadas) {
-            getData(camada.identificador, camada.cor_preenchimento);
+            getData(camada.identificador, camada.cor_preenchimento, camada.limite);
         }
     }
 
@@ -104,5 +129,7 @@
     map.on('click', (e) => {
         console.log('map click', e.latlng);
     });
+
+    updateData();
 
 })();

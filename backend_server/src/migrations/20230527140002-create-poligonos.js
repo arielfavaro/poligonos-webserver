@@ -13,7 +13,8 @@ module.exports = {
           type: Sequelize.INTEGER
         },
         geom: {
-          type: Sequelize.GEOMETRY
+          type: Sequelize.GEOMETRY,
+          allowNull: false,
         },
         ativo: {
           type: Sequelize.BOOLEAN
@@ -35,7 +36,7 @@ module.exports = {
         ['geom'],
         {
           fields: 'geom',
-          using: 'gist',
+          type: 'SPATIAL',
           transaction,
         }
       );

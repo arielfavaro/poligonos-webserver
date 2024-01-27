@@ -16,31 +16,26 @@ services:
     restart: unless-stopped
 
   db:
-    image: postgis/postgis:15-3.3
+    image: mysql:5.7
     ports:
-      - 5432:5432
+      - 3306:3306
+    command: --default-authentication-plugin=mysql_native_password
     environment:
-      - POSTGRES_USER=postgres
-      - POSTGRES_PASSWORD=1234
-      - POSTGRES_DB=poligonos
-      - POSTGIS_GDAL_ENABLED_DRIVERS=ENABLE_ALL
+      - MYSQL_USER=mapa
+      - MYSQL_PASSWORD=1234
+      - MYSQL_ROOT_PASSWORD=12345678
+      - MYSQL_DATABASE=poligonos
     volumes:
-      - postgis_poligonos:/var/lib/postgresql/data
+      - poligonos:/var/lib/mysql
     restart: unless-stopped
 
-  pgadmin:
-    image: dpage/pgadmin4:7.1
-    environment:
-      - PGADMIN_DEFAULT_EMAIL=dev@dev.com
-      - PGADMIN_DEFAULT_PASSWORD=1234
+  phpmyadmin:
+    image: phpmyadmin:5.2.1-apache
+    restart: unless-stopped
     ports:
-      - 8081:80
-
-  # adminer:
-  #   image: adminer
-  #   restart: unless-stopped
-  #   ports:
-  #     - 8082:8080
+      - 8082:80
+    environment:
+      - PMA_ARBITRARY=1
 
 volumes:
-  postgis_poligonos:
+  poligonos:

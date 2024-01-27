@@ -24,6 +24,9 @@ module.exports = {
       cor_preenchimento: {
         type: Sequelize.STRING
       },
+      limite: {
+        type: Sequelize.INTEGER
+      },
       ativo: {
         type: Sequelize.BOOLEAN
       },
