@@ -33,5 +33,19 @@ verificar otimização
 ST_AsGeoJSON(ST_Simplify(ST_Force2D("geom"), ${simplify}, true)::geometry(MultiPolygon, 4326))::json->'coordinates' AS coordinates
 ```
 
+## MySQL
+### Versão 5.7
+- Necessário ter uma coluna TINYINT geom_valida
+    - Precisa validar com o SRID ainda = 0
+    ```sql
+    UPDATE tabela SET geom_valida = ST_ISVALID(geom);
+    ```
+
+- Necessário setar o SRID nas geometrias com update ou no insert. Nâo é possível definir o SRID na coluna no create table
+```sql
+UPDATE tabela
+SET geom = ST_GEOMFROMTEXT(ST_ASTEXT(geom), 4326);
+```
+
 ## Requests
 http://localhost:3000/teste/query?returnGeometry=true&where=1%3D1&outSR=4326&outFields=*&token=tQahVpQgiZj03KWkltzOCGHRMEq3aKtrfAspvpbZnAIYwiKwrT7Wc0GtDyCG7EbQe2ClD5XX96Qs6eq9c7ou3V4Qg4wfMiJ75S2k9h4pMmXozM9YtZcowhccNW2sQcWkf02JUM391IBc4a3teIKC5w..&inSR=4326&geometry=%7B%22xmin%22%3A-48.64952087402344%2C%22ymin%22%3A-15.912470282559344%2C%22xmax%22%3A-47.331161499023445%2C%22ymax%22%3A-15.57938790814887%2C%22spatialReference%22%3A%7B%22wkid%22%3A4326%7D%7D&geometryType=esriGeometryEnvelope&spatialRel=esriSpatialRelIntersects&resultRecordCount=200&f=geojson
