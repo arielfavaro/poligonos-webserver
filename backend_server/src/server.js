@@ -130,8 +130,6 @@ app.get('/:identificadorCamada/query', queryValidationChain(), async (req, res) 
                 ST_ENVELOPE(ST_GEOMFROMTEXT('LineString(${xmin} ${ymin}, ${xmax} ${ymax})', 4326))
             )
 
-            ORDER BY id
-
             LIMIT ${limit}
     `;
 
